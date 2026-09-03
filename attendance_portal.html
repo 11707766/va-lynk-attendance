@@ -118,6 +118,8 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
     const storageKey = 'va-lynk-attendance-v1';
+    const supabaseUrl = 'https://sjhshpltqldolodjlpja.supabase.co';
+    const supabaseKey = 'sb_publishable_RaKSWueBZrOdbYI48QczMw_kCdmLVTj';
     const defaultData = { employees:[{id:'EMP001',name:'Aarav Sharma',position:'Employee',salary:25000,contact:'9876543210'}], attendance:[], holidays:[], manager:{username:'manager',password:'1234'} };
     let data = JSON.parse(localStorage.getItem(storageKey) || JSON.stringify(defaultData));
     data.manager ||= defaultData.manager;
@@ -127,7 +129,22 @@
     const $ = id => document.getElementById(id);
     const localDate = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; };
     const timeText = value => value ? new Date(value).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '--:--';
-    const save = () => localStorage.setItem(storageKey, JSON.stringify(data));
+    const save = () => {
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      fetch(`${supabaseUrl}/rest/v1/app_state?id=eq.1`, {
+        method: 'PATCH',
+        headers: { apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, 'Content-Type':'application/json', Prefer:'return=minimal' },
+        body: JSON.stringify({data, updated_at:new Date().toISOString()})
+      }).catch(() => {});
+    };
+    const loadSharedData = async () => {
+      try {
+        const response = await fetch(`${supabaseUrl}/rest/v1/app_state?select=data&id=eq.1`, {headers:{apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`}});
+        const rows = await response.json();
+        if (response.ok && rows[0]?.data) { data = rows[0].data; data.manager ||= defaultData.manager; data.holidays ||= []; localStorage.setItem(storageKey, JSON.stringify(data)); }
+      } catch { }
+      render();
+    };
     const findRecord = (employeeId, date) => data.attendance.find(record => record.employeeId === employeeId && record.date === date);
     const hours = record => record?.out ? Math.max(0, (new Date(record.out) - new Date(record.in)) / 3600000) : 0;
     const holidayForDate = date => data.holidays.find(holiday => holiday.date === date);
@@ -204,6 +221,7 @@
     $('settingsForm').onsubmit = event => { event.preventDefault(); if ($('currentPassword').value !== data.manager.password) { $('settingsError').textContent = 'Current password is incorrect.'; $('settingsError').style.display = 'block'; return; } data.manager = {username:$('newUsername').value.trim(),password:$('newPassword').value}; save(); $('settingsBackdrop').classList.remove('show'); alert('Manager login settings saved.'); };
     $('employeeForm').onsubmit = event => { event.preventDefault(); const id = $('editingId').value; const employee = {id:id || `EMP${String(Date.now()).slice(-5)}`,name:$('formName').value.trim(),position:$('formPosition').value.trim(),salary:Number($('formSalary').value),contact:$('formContact').value.trim()}; if (id) data.employees = data.employees.map(item => item.id === id ? employee : item); else data.employees.push(employee); if (!selectedId) selectedId = employee.id; save(); $('modalBackdrop').classList.remove('show'); render(); };
     render();
+    loadSharedData();
   </script>
 </body>
 </html>
