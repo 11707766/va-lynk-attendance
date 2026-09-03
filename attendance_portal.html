@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VA Lynk Job Pvt. Ltd. | Attendance</title>
+  <style>
+    :root { --ink:#14213d; --muted:#64748b; --line:#e2e8f0; --surface:#fff; --page:#f6f8fb; --blue:#2563eb; --green:#069669; --orange:#f45b09; --soft-blue:#eef5ff; --soft-gray:#f1f5f9; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--page); color:var(--ink); font-family:"Segoe UI", Tahoma, sans-serif; }
+    .shell { max-width:1600px; min-height:100vh; margin:auto; padding:36px 60px 48px; }
+    .eyebrow { color:var(--blue); font-size:20px; font-weight:800; letter-spacing:0; }
+    .hero { display:flex; justify-content:space-between; align-items:center; gap:24px; margin:13px 0 30px; }
+    .brand-heading { display:flex; align-items:center; gap:16px; }
+    .brand-logo { width:76px; height:76px; object-fit:contain; }
+    h1 { margin:0; font-size:44px; line-height:1.08; letter-spacing:0; }
+    .subhead { margin:11px 0 0; color:var(--muted); font-size:20px; }
+    .view-toggle { display:flex; gap:5px; padding:7px; border:1px solid var(--line); border-radius:23px; background:white; }
+    button { border:0; border-radius:10px; padding:13px 20px; cursor:pointer; font:700 16px "Segoe UI", Tahoma, sans-serif; transition:transform .15s, background .15s; }
+    button:hover { transform:translateY(-1px); }
+    .view-toggle button { padding:12px 22px; border-radius:14px; background:#e8eef7; color:var(--ink); }
+    .view-toggle button.active { background:var(--blue); color:white; }
+    .layout { display:grid; grid-template-columns:486px minmax(0, 1fr); gap:26px; }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:25px; box-shadow:0 1px 2px rgba(15,23,42,.03); }
+    .employee-panel { padding:29px; }
+    h2 { margin:0; font-size:32px; letter-spacing:0; }
+    h3 { margin:0; font-size:27px; letter-spacing:0; }
+    label { display:block; margin:27px 0 9px; font-size:16px; font-weight:750; }
+    select, input { width:100%; border:1px solid #cbd5e1; border-radius:14px; background:white; color:var(--ink); padding:14px 17px; font:16px "Segoe UI", Tahoma, sans-serif; outline:none; }
+    select:focus, input:focus { border-color:var(--blue); box-shadow:0 0 0 3px #dbeafe; }
+    .selected { margin:30px 0 17px; padding:26px 29px; border:1px solid #d7e5f5; border-radius:25px; background:var(--soft-blue); color:var(--muted); font-size:20px; }
+    .selected strong { display:block; color:var(--ink); font-size:20px; margin:2px 0; }
+    .punch-actions { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .punch-in { background:var(--green); color:white; }
+    .punch-out { background:var(--orange); color:white; }
+    button:disabled { cursor:not-allowed; opacity:.44; transform:none; }
+    .private-note { color:var(--muted); font-size:18px; line-height:1.25; margin:22px 0 18px; }
+    .status-panel { padding:29px; }
+    .status-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:26px; margin:28px 0 20px; }
+    .stat { min-height:147px; padding:29px; border:1px solid var(--line); border-radius:25px; }
+    .stat span { display:block; color:var(--muted); font-size:20px; }
+    .stat strong { display:block; margin-top:2px; font-size:30px; }
+    .in-time { color:var(--green); } .out-time { color:var(--orange); }
+    .rule { padding:28px 30px; background:var(--soft-gray); border:1px solid #e2e8f0; border-radius:25px; font-size:20px; }
+    .rule strong { font-size:20px; }
+    .manager { display:none; }
+    .manager.show { display:block; }
+    .manager-top { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:22px; }
+    .date-control { display:flex; align-items:center; gap:10px; }
+    .date-control label { margin:0; white-space:nowrap; }
+    .date-control input { width:164px; padding:11px; }
+    .primary { background:var(--blue); color:white; }
+    .summary { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:24px; }
+    .summary-card { padding:20px; border-radius:16px; background:white; border:1px solid var(--line); }
+    .summary-card span { color:var(--muted); font-size:12px; font-weight:800; }
+    .summary-card strong { display:block; margin-top:7px; font-size:27px; }
+    .table-wrap { overflow:auto; background:white; border:1px solid var(--line); border-radius:16px; }
+    table { width:100%; border-collapse:collapse; min-width:880px; }
+    th { padding:15px 16px; text-align:left; color:#475569; background:#f8fafc; font-size:12px; letter-spacing:0; }
+    td { padding:16px; border-top:1px solid var(--line); font-size:14px; }
+    .badge { display:inline-block; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:800; }
+    .badge.absent { background:#fff4e6; color:#b45309; } .badge.working { background:#e9f8f0; color:#047857; } .badge.complete { background:#eaf3ff; color:#1d4ed8; }
+    .badge.holiday { background:#f4edff; color:#7e22ce; }
+    .table-actions { display:flex; gap:7px; }
+    .table-actions button { padding:7px 11px; border-radius:8px; font-size:12px; background:#e9eff8; color:#1e3a5f; }
+    .table-actions .delete { background:#fff0ed; color:#c2410c; }
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(15,23,42,.42); align-items:center; justify-content:center; padding:20px; }
+    .modal-backdrop.show { display:flex; }
+    .modal { width:min(470px, 100%); max-height:calc(100vh - 40px); overflow-y:auto; padding:28px; border-radius:18px; background:white; }
+    .modal h2 { font-size:25px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+    .secondary { background:#e8eef7; color:var(--ink); }
+    .holiday-list { margin-top:22px; border-top:1px solid var(--line); }
+    .holiday-item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+    .holiday-item strong, .holiday-item span { display:block; }
+    .holiday-item span { color:var(--muted); font-size:13px; margin-top:2px; }
+    .holiday-item button { padding:7px 10px; border-radius:8px; font-size:12px; background:#fff0ed; color:#c2410c; }
+    @media (max-width:900px) { .shell { padding:24px 18px; } h1 { font-size:34px; } .brand-logo { width:58px; height:58px; } .hero { align-items:flex-start; flex-direction:column; } .layout { grid-template-columns:1fr; } .status-grid, .summary { grid-template-columns:1fr; gap:12px; } .manager-top { align-items:flex-start; flex-direction:column; } .date-control { width:100%; flex-wrap:wrap; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="eyebrow">Office Time: 09:30 to 18:30 - Required: 9 hours</div>
+    <section class="hero">
+      <div class="brand-heading"><img class="brand-logo" src="https://valynkjob.com/wp-content/uploads/2025/03/valynkjob-logo.png" alt="VA Lynk Job logo"><h1>VA Lynk Job Pvt. Ltd Attendance System</h1></div>
+      <div class="view-toggle"><button id="userTab" class="active">User</button><button id="managerTab">Manager</button></div>
+    </section>
+
+    <section id="userView" class="layout">
+      <aside class="card employee-panel">
+        <h2>Employee / Candidate Page</h2>
+        <label for="employeeSelect">Select your name</label>
+        <select id="employeeSelect"></select>
+        <div class="selected"><span>Selected</span><strong id="selectedName"></strong><span id="selectedDetails"></span></div>
+        <div class="punch-actions"><button id="punchIn" class="punch-in">Punch In</button><button id="punchOut" class="punch-out">Punch Out</button></div>
+      </aside>
+      <section class="card status-panel">
+        <h2>Today Status</h2>
+        <div class="status-grid">
+          <div class="stat"><span>Date</span><strong id="todayDate"></strong></div>
+          <div class="stat"><span>Punch In</span><strong id="inTime" class="in-time">--:--</strong></div>
+          <div class="stat"><span>Punch Out</span><strong id="outTime" class="out-time">--:--</strong></div>
+        </div>
+        <div class="rule"><strong>Rule:</strong> Complete 9 hours between office timing 9:30 AM to 6:30 PM.</div>
+      </section>
+    </section>
+
+    <section id="managerView" class="manager">
+      <div class="manager-top"><div><h2>Attendance Dashboard</h2><p class="subhead">Employee attendance and salary review</p></div><div class="date-control"><label for="reportDate">Report date</label><input id="reportDate" type="date"><button id="holidayCalendar" class="secondary">Holiday Calendar</button><button id="addEmployee" class="primary">Add Employee</button><button id="downloadExcel" class="secondary">Download Excel</button><button id="accountSettings" class="secondary">Login Settings</button><button id="managerLogout" class="secondary">Logout</button></div></div>
+      <div class="summary" id="summary"></div>
+      <div class="table-wrap"><table><thead><tr><th>EMPLOYEE</th><th>POSITION</th><th>CONTACT</th><th>PUNCH IN</th><th>PUNCH OUT</th><th>HOURS</th><th>DEDUCTION</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="employeeRows"></tbody></table></div>
+    </section>
+  </main>
+  <div id="modalBackdrop" class="modal-backdrop"><form id="employeeForm" class="modal"><h2 id="modalTitle">Add Employee</h2><input id="editingId" type="hidden"><label for="formName">Full name</label><input id="formName" required><label for="formPosition">Position</label><input id="formPosition" required><label for="formSalary">Monthly salary (Rs.)</label><input id="formSalary" type="number" min="1" required><label for="formContact">Contact number</label><input id="formContact" required><div class="modal-actions"><button type="button" id="cancelModal" class="secondary">Cancel</button><button class="primary">Save Employee</button></div></form></div>
+  <div id="loginBackdrop" class="modal-backdrop"><form id="managerLoginForm" class="modal"><h2>Manager Login</h2><p class="subhead">Sign in to access attendance, employee data, and payroll deductions.</p><label for="managerUsername">Username</label><input id="managerUsername" autocomplete="username" required><label for="managerPassword">Password</label><input id="managerPassword" type="password" autocomplete="current-password" required><p id="loginError" class="private-note" style="display:none;color:#c2410c;margin:14px 0 0;font-size:14px"></p><div class="modal-actions"><button type="button" id="cancelLogin" class="secondary">Cancel</button><button class="primary">Sign In</button></div></form></div>
+  <div id="settingsBackdrop" class="modal-backdrop"><form id="settingsForm" class="modal"><h2>Manager Login Settings</h2><p class="subhead">Change the credentials used to access the manager dashboard.</p><label for="currentPassword">Current password</label><input id="currentPassword" type="password" autocomplete="current-password" required><label for="newUsername">New username</label><input id="newUsername" autocomplete="username" required><label for="newPassword">New password</label><input id="newPassword" type="password" minlength="4" autocomplete="new-password" required><p id="settingsError" class="private-note" style="display:none;color:#c2410c;margin:14px 0 0;font-size:14px"></p><div class="modal-actions"><button type="button" id="cancelSettings" class="secondary">Cancel</button><button class="primary">Save Settings</button></div></form></div>
+  <div id="holidayBackdrop" class="modal-backdrop"><form id="holidayForm" class="modal"><h2>Holiday Calendar</h2><p class="subhead">Add festival and public holiday dates. No salary deduction is applied on these dates.</p><label for="holidayName">Holiday name</label><input id="holidayName" placeholder="Example: Diwali" required><label for="holidayDate">Holiday date</label><input id="holidayDate" type="date" required><div class="modal-actions"><button type="button" id="cancelHoliday" class="secondary">Close</button><button class="primary">Add Holiday</button></div><div id="holidayList" class="holiday-list"></div></form></div>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script>
+    const storageKey = 'va-lynk-attendance-v1';
+    const defaultData = { employees:[{id:'EMP001',name:'Aarav Sharma',position:'Employee',salary:25000,contact:'9876543210'}], attendance:[], holidays:[], manager:{username:'manager',password:'1234'} };
+    let data = JSON.parse(localStorage.getItem(storageKey) || JSON.stringify(defaultData));
+    data.manager ||= defaultData.manager;
+    data.holidays = (data.holidays || []).map(holiday => typeof holiday === 'string' ? {name:'Public Holiday', date:holiday} : holiday);
+    let selectedId = data.employees[0]?.id || '';
+    let managerSignedIn = false;
+    const $ = id => document.getElementById(id);
+    const localDate = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; };
+    const timeText = value => value ? new Date(value).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '--:--';
+    const save = () => localStorage.setItem(storageKey, JSON.stringify(data));
+    const findRecord = (employeeId, date) => data.attendance.find(record => record.employeeId === employeeId && record.date === date);
+    const hours = record => record?.out ? Math.max(0, (new Date(record.out) - new Date(record.in)) / 3600000) : 0;
+    const holidayForDate = date => data.holidays.find(holiday => holiday.date === date);
+    const isHoliday = date => new Date(`${date}T00:00:00`).getDay() === 0 || Boolean(holidayForDate(date));
+    const deduction = (record, employee) => isHoliday(record?.date) ? 0 : Math.max(0, 9 - hours(record)) * Number(employee.salary) / (26 * 9);
+    const formatMoney = value => `Rs. ${value.toLocaleString('en-IN', {maximumFractionDigits:0})}`;
+    function downloadExcel() {
+      const employeeRows = data.employees.map(employee => ({
+        'Employee ID': employee.id, Name: employee.name, Position: employee.position,
+        Contact: employee.contact, 'Monthly Salary (Rs.)': Number(employee.salary)
+      }));
+      const attendanceRows = data.attendance.map(record => {
+        const employee = data.employees.find(item => item.id === record.employeeId);
+        return {
+          Date: record.date, 'Employee ID': record.employeeId, Name: employee?.name || 'Deleted employee',
+          Position: employee?.position || '-', 'Punch In': timeText(record.in), 'Punch Out': timeText(record.out),
+          'Hours Worked': record.out ? Number(hours(record).toFixed(2)) : '',
+          'Salary Deduction (Rs.)': record.out && employee ? Number(deduction(record, employee).toFixed(2)) : '',
+          'Public Holiday': isHoliday(record.date) ? 'Yes' : 'No',
+          Status: isHoliday(record.date) ? 'Holiday' : !record.out ? 'Working' : 'Complete'
+        };
+      });
+      const workbook = XLSX.utils.book_new();
+      const employeesSheet = XLSX.utils.json_to_sheet(employeeRows.length ? employeeRows : [{Message:'No employees found'}]);
+      const attendanceSheet = XLSX.utils.json_to_sheet(attendanceRows.length ? attendanceRows : [{Message:'No attendance records found'}]);
+      employeesSheet['!cols'] = [{wch:14},{wch:24},{wch:20},{wch:16},{wch:21}];
+      attendanceSheet['!cols'] = [{wch:13},{wch:14},{wch:24},{wch:20},{wch:14},{wch:14},{wch:16},{wch:24},{wch:15},{wch:13}];
+      XLSX.utils.book_append_sheet(workbook, employeesSheet, 'Employees');
+      XLSX.utils.book_append_sheet(workbook, attendanceSheet, 'Attendance');
+      XLSX.writeFile(workbook, `VA-Lynk-Attendance-${localDate()}.xlsx`);
+    }
+    function renderUser() {
+      const employee = data.employees.find(item => item.id === selectedId);
+      $('employeeSelect').innerHTML = data.employees.map(item => `<option value="${item.id}">${item.name} (${item.id})</option>`).join('');
+      $('employeeSelect').value = selectedId;
+      $('selectedName').textContent = employee ? employee.name : 'No employee selected';
+      $('selectedDetails').textContent = employee ? `${employee.position} - ${employee.id}` : '';
+      const record = findRecord(selectedId, localDate());
+      $('todayDate').textContent = localDate(); $('inTime').textContent = timeText(record?.in); $('outTime').textContent = timeText(record?.out);
+      const holiday = isHoliday(localDate());
+      $('punchIn').disabled = holiday || !employee || Boolean(record?.in); $('punchOut').disabled = holiday || !record?.in || Boolean(record?.out);
+      if (holiday) { $('inTime').textContent = holidayForDate(localDate())?.name || 'Sunday'; $('outTime').textContent = 'No deduction'; }
+    }
+    function renderManager() {
+      const date = $('reportDate').value || localDate();
+      const holiday = isHoliday(date);
+      const records = data.attendance.filter(record => record.date === date);
+      const punched = records.length; const complete = records.filter(record => record.out).length;
+      const totalDeduction = records.reduce((sum, record) => sum + (record.out ? deduction(record, data.employees.find(item => item.id === record.employeeId)) : 0), 0);
+      $('summary').innerHTML = [['TOTAL EMPLOYEES',data.employees.length],['PUNCHED IN',punched],['DAY COMPLETE',complete],[holiday ? 'PUBLIC HOLIDAY' : 'SALARY DEDUCTION',holiday ? 'YES' : formatMoney(totalDeduction)]].map(([label,value]) => `<div class="summary-card"><span>${label}</span><strong>${value}</strong></div>`).join('');
+      $('employeeRows').innerHTML = data.employees.map(employee => { const record = findRecord(employee.id,date); const state = holiday ? 'Holiday' : !record ? 'Absent' : record.out ? 'Complete' : 'Working'; const badge = state.toLowerCase(); return `<tr><td><strong>${employee.name}</strong><br><small>${employee.id}</small></td><td>${employee.position}</td><td>${employee.contact}</td><td>${timeText(record?.in)}</td><td>${timeText(record?.out)}</td><td>${record?.out ? hours(record).toFixed(2) : '-'}</td><td>${record?.out ? formatMoney(deduction(record,employee)) : holiday ? 'Rs. 0' : '-'}</td><td><span class="badge ${badge}">${state}</span></td><td><div class="table-actions"><button onclick="editEmployee('${employee.id}')">Edit</button><button class="delete" onclick="removeEmployee('${employee.id}')">Delete</button></div></td></tr>`; }).join('');
+    }
+    function render() { renderUser(); renderManager(); }
+    function switchView(view) { $('userView').style.display = view === 'user' ? 'grid' : 'none'; $('managerView').classList.toggle('show',view === 'manager'); $('userTab').classList.toggle('active',view === 'user'); $('managerTab').classList.toggle('active',view === 'manager'); }
+    function openManagerLogin() { $('managerUsername').value = ''; $('managerPassword').value = ''; $('loginError').style.display = 'none'; $('loginBackdrop').classList.add('show'); $('managerUsername').focus(); }
+    function openSettings() { $('currentPassword').value = ''; $('newUsername').value = data.manager.username; $('newPassword').value = ''; $('settingsError').style.display = 'none'; $('settingsBackdrop').classList.add('show'); $('currentPassword').focus(); }
+    function renderHolidayList() { $('holidayList').innerHTML = data.holidays.length ? data.holidays.slice().sort((left, right) => left.date.localeCompare(right.date)).map(holiday => `<div class="holiday-item"><div><strong>${holiday.name}</strong><span>${holiday.date}</span></div><button type="button" onclick="removeHoliday('${holiday.date}')">Remove</button></div>`).join('') : '<p class="private-note" style="font-size:14px">No festival holidays have been added.</p>'; }
+    function openHolidayCalendar() { $('holidayName').value = ''; $('holidayDate').value = $('reportDate').value || localDate(); renderHolidayList(); $('holidayBackdrop').classList.add('show'); $('holidayName').focus(); }
+    function openForm(employee) { $('modalTitle').textContent = employee ? 'Edit Employee' : 'Add Employee'; $('editingId').value = employee?.id || ''; $('formName').value = employee?.name || ''; $('formPosition').value = employee?.position || ''; $('formSalary').value = employee?.salary || ''; $('formContact').value = employee?.contact || ''; $('modalBackdrop').classList.add('show'); }
+    window.editEmployee = id => openForm(data.employees.find(employee => employee.id === id));
+    window.removeEmployee = id => { const employee = data.employees.find(item => item.id === id); if (!confirm(`Delete ${employee.name} and their attendance records?`)) return; data.employees = data.employees.filter(item => item.id !== id); data.attendance = data.attendance.filter(record => record.employeeId !== id); selectedId = data.employees[0]?.id || ''; save(); render(); };
+    window.removeHoliday = date => { data.holidays = data.holidays.filter(holiday => holiday.date !== date); save(); renderHolidayList(); render(); };
+    $('employeeSelect').onchange = event => { selectedId = event.target.value; renderUser(); };
+    $('punchIn').onclick = () => { data.attendance.push({employeeId:selectedId,date:localDate(),in:new Date().toISOString(),out:null}); save(); render(); };
+    $('punchOut').onclick = () => { const record = findRecord(selectedId,localDate()); if (record) { record.out = new Date().toISOString(); save(); render(); } };
+    $('userTab').onclick = () => switchView('user'); $('managerTab').onclick = () => managerSignedIn ? switchView('manager') : openManagerLogin(); $('reportDate').value = localDate(); $('reportDate').onchange = renderManager;
+    $('holidayCalendar').onclick = openHolidayCalendar; $('cancelHoliday').onclick = () => $('holidayBackdrop').classList.remove('show');
+    $('holidayForm').onsubmit = event => { event.preventDefault(); const date = $('holidayDate').value; const name = $('holidayName').value.trim(); if (holidayForDate(date)) { alert('A festival holiday is already set for this date.'); return; } data.holidays.push({name, date}); save(); $('holidayName').value = ''; renderHolidayList(); render(); };
+    $('addEmployee').onclick = () => openForm(); $('downloadExcel').onclick = downloadExcel; $('cancelModal').onclick = () => $('modalBackdrop').classList.remove('show');
+    $('cancelLogin').onclick = () => $('loginBackdrop').classList.remove('show');
+    $('managerLoginForm').onsubmit = event => { event.preventDefault(); if ($('managerUsername').value.trim() !== data.manager.username || $('managerPassword').value !== data.manager.password) { $('loginError').textContent = 'Incorrect username or password.'; $('loginError').style.display = 'block'; return; } managerSignedIn = true; $('loginBackdrop').classList.remove('show'); switchView('manager'); };
+    $('managerLogout').onclick = () => { managerSignedIn = false; switchView('user'); };
+    $('accountSettings').onclick = openSettings; $('cancelSettings').onclick = () => $('settingsBackdrop').classList.remove('show');
+    $('settingsForm').onsubmit = event => { event.preventDefault(); if ($('currentPassword').value !== data.manager.password) { $('settingsError').textContent = 'Current password is incorrect.'; $('settingsError').style.display = 'block'; return; } data.manager = {username:$('newUsername').value.trim(),password:$('newPassword').value}; save(); $('settingsBackdrop').classList.remove('show'); alert('Manager login settings saved.'); };
+    $('employeeForm').onsubmit = event => { event.preventDefault(); const id = $('editingId').value; const employee = {id:id || `EMP${String(Date.now()).slice(-5)}`,name:$('formName').value.trim(),position:$('formPosition').value.trim(),salary:Number($('formSalary').value),contact:$('formContact').value.trim()}; if (id) data.employees = data.employees.map(item => item.id === id ? employee : item); else data.employees.push(employee); if (!selectedId) selectedId = employee.id; save(); $('modalBackdrop').classList.remove('show'); render(); };
+    render();
+  </script>
+</body>
+</html>
