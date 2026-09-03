@@ -101,7 +101,7 @@
           <div class="stat"><span>Punch In</span><strong id="inTime" class="in-time">--:--</strong></div>
           <div class="stat"><span>Punch Out</span><strong id="outTime" class="out-time">--:--</strong></div>
         </div>
-        <div class="rule"><strong>Rule:</strong> Complete 9 hours between office timing 9:30 AM to 6:30 PM.</div>
+        <div class="rule"><strong>Rule:</strong> Complete 9 hours between 9:30 AM and 6:30 PM. Sunday is a weekly holiday. Lunch-time punches from 1:00 PM to 2:00 PM are counted as First Half.</div>
       </section>
     </section>
 
@@ -129,6 +129,8 @@
     const $ = id => document.getElementById(id);
     const localDate = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; };
     const timeText = value => value ? new Date(value).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '--:--';
+    const isLunchTime = value => { const time = new Date(value); const minutes = time.getHours() * 60 + time.getMinutes(); return minutes >= 13 * 60 && minutes < 14 * 60; };
+    const attendancePhase = record => record?.lunchPunch ? 'First Half' : '';
     const save = () => {
       localStorage.setItem(storageKey, JSON.stringify(data));
       fetch(`${supabaseUrl}/rest/v1/app_state?id=eq.1`, {
@@ -163,6 +165,7 @@
           Position: employee?.position || '-', 'Punch In': timeText(record.in), 'Punch Out': timeText(record.out),
           'Hours Worked': record.out ? Number(hours(record).toFixed(2)) : '',
           'Salary Deduction (Rs.)': record.out && employee ? Number(deduction(record, employee).toFixed(2)) : '',
+          'Attendance Half': attendancePhase(record),
           'Public Holiday': isHoliday(record.date) ? 'Yes' : 'No',
           Status: isHoliday(record.date) ? 'Holiday' : !record.out ? 'Working' : 'Complete'
         };
@@ -171,7 +174,7 @@
       const employeesSheet = XLSX.utils.json_to_sheet(employeeRows.length ? employeeRows : [{Message:'No employees found'}]);
       const attendanceSheet = XLSX.utils.json_to_sheet(attendanceRows.length ? attendanceRows : [{Message:'No attendance records found'}]);
       employeesSheet['!cols'] = [{wch:14},{wch:24},{wch:20},{wch:16},{wch:21}];
-      attendanceSheet['!cols'] = [{wch:13},{wch:14},{wch:24},{wch:20},{wch:14},{wch:14},{wch:16},{wch:24},{wch:15},{wch:13}];
+      attendanceSheet['!cols'] = [{wch:13},{wch:14},{wch:24},{wch:20},{wch:14},{wch:14},{wch:16},{wch:24},{wch:18},{wch:15},{wch:13}];
       XLSX.utils.book_append_sheet(workbook, employeesSheet, 'Employees');
       XLSX.utils.book_append_sheet(workbook, attendanceSheet, 'Attendance');
       XLSX.writeFile(workbook, `VA-Lynk-Attendance-${localDate()}.xlsx`);
@@ -195,21 +198,21 @@
       const punched = records.length; const complete = records.filter(record => record.out).length;
       const totalDeduction = records.reduce((sum, record) => sum + (record.out ? deduction(record, data.employees.find(item => item.id === record.employeeId)) : 0), 0);
       $('summary').innerHTML = [['TOTAL EMPLOYEES',data.employees.length],['PUNCHED IN',punched],['DAY COMPLETE',complete],[holiday ? 'PUBLIC HOLIDAY' : 'SALARY DEDUCTION',holiday ? 'YES' : formatMoney(totalDeduction)]].map(([label,value]) => `<div class="summary-card"><span>${label}</span><strong>${value}</strong></div>`).join('');
-      $('employeeRows').innerHTML = data.employees.map(employee => { const record = findRecord(employee.id,date); const state = holiday ? 'Holiday' : !record ? 'Absent' : record.out ? 'Complete' : 'Working'; const badge = state.toLowerCase(); return `<tr><td><strong>${employee.name}</strong><br><small>${employee.id}</small></td><td>${employee.position}</td><td>${employee.contact}</td><td>${timeText(record?.in)}</td><td>${timeText(record?.out)}</td><td>${record?.out ? hours(record).toFixed(2) : '-'}</td><td>${record?.out ? formatMoney(deduction(record,employee)) : holiday ? 'Rs. 0' : '-'}</td><td><span class="badge ${badge}">${state}</span></td><td><div class="table-actions"><button onclick="editEmployee('${employee.id}')">Edit</button><button class="delete" onclick="removeEmployee('${employee.id}')">Delete</button></div></td></tr>`; }).join('');
+      $('employeeRows').innerHTML = data.employees.map(employee => { const record = findRecord(employee.id,date); const state = holiday ? 'Holiday' : !record ? 'Absent' : record.out ? 'Complete' : 'Working'; const phase = attendancePhase(record); const badge = state.toLowerCase(); return `<tr><td><strong>${employee.name}</strong><br><small>${employee.id}</small></td><td>${employee.position}</td><td>${employee.contact}</td><td>${timeText(record?.in)}${phase ? `<br><small>${phase}</small>` : ''}</td><td>${timeText(record?.out)}${phase ? `<br><small>${phase}</small>` : ''}</td><td>${record?.out ? hours(record).toFixed(2) : '-'}</td><td>${record?.out ? formatMoney(deduction(record,employee)) : holiday ? 'Rs. 0' : '-'}</td><td><span class="badge ${badge}">${state}</span></td><td><div class="table-actions"><button onclick="editEmployee('${employee.id}')">Edit</button><button class="delete" onclick="removeEmployee('${employee.id}')">Delete</button></div></td></tr>`; }).join('');
     }
     function render() { renderUser(); renderManager(); }
     function switchView(view) { $('userView').style.display = view === 'user' ? 'grid' : 'none'; $('managerView').classList.toggle('show',view === 'manager'); $('userTab').classList.toggle('active',view === 'user'); $('managerTab').classList.toggle('active',view === 'manager'); }
     function openManagerLogin() { $('managerUsername').value = ''; $('managerPassword').value = ''; $('loginError').style.display = 'none'; $('loginBackdrop').classList.add('show'); $('managerUsername').focus(); }
     function openSettings() { $('currentPassword').value = ''; $('newUsername').value = data.manager.username; $('newPassword').value = ''; $('settingsError').style.display = 'none'; $('settingsBackdrop').classList.add('show'); $('currentPassword').focus(); }
-    function renderHolidayList() { $('holidayList').innerHTML = data.holidays.length ? data.holidays.slice().sort((left, right) => left.date.localeCompare(right.date)).map(holiday => `<div class="holiday-item"><div><strong>${holiday.name}</strong><span>${holiday.date}</span></div><button type="button" onclick="removeHoliday('${holiday.date}')">Remove</button></div>`).join('') : '<p class="private-note" style="font-size:14px">No festival holidays have been added.</p>'; }
+    function renderHolidayList() { const sunday = '<div class="holiday-item"><div><strong>Sunday</strong><span>Weekly default holiday</span></div></div>'; const festivals = data.holidays.slice().sort((left, right) => left.date.localeCompare(right.date)).map(holiday => `<div class="holiday-item"><div><strong>${holiday.name}</strong><span>${holiday.date}</span></div><button type="button" onclick="removeHoliday('${holiday.date}')">Remove</button></div>`).join(''); $('holidayList').innerHTML = sunday + (festivals || '<p class="private-note" style="font-size:14px">No festival holidays have been added.</p>'); }
     function openHolidayCalendar() { $('holidayName').value = ''; $('holidayDate').value = $('reportDate').value || localDate(); renderHolidayList(); $('holidayBackdrop').classList.add('show'); $('holidayName').focus(); }
     function openForm(employee) { $('modalTitle').textContent = employee ? 'Edit Employee' : 'Add Employee'; $('editingId').value = employee?.id || ''; $('formName').value = employee?.name || ''; $('formPosition').value = employee?.position || ''; $('formSalary').value = employee?.salary || ''; $('formContact').value = employee?.contact || ''; $('modalBackdrop').classList.add('show'); }
     window.editEmployee = id => openForm(data.employees.find(employee => employee.id === id));
     window.removeEmployee = id => { const employee = data.employees.find(item => item.id === id); if (!confirm(`Delete ${employee.name} and their attendance records?`)) return; data.employees = data.employees.filter(item => item.id !== id); data.attendance = data.attendance.filter(record => record.employeeId !== id); selectedId = data.employees[0]?.id || ''; save(); render(); };
     window.removeHoliday = date => { data.holidays = data.holidays.filter(holiday => holiday.date !== date); save(); renderHolidayList(); render(); };
     $('employeeSelect').onchange = event => { selectedId = event.target.value; renderUser(); };
-    $('punchIn').onclick = () => { data.attendance.push({employeeId:selectedId,date:localDate(),in:new Date().toISOString(),out:null}); save(); render(); };
-    $('punchOut').onclick = () => { const record = findRecord(selectedId,localDate()); if (record) { record.out = new Date().toISOString(); save(); render(); } };
+    $('punchIn').onclick = () => { const now = new Date().toISOString(); data.attendance.push({employeeId:selectedId,date:localDate(),in:now,out:null,lunchPunch:isLunchTime(now)}); save(); render(); };
+    $('punchOut').onclick = () => { const record = findRecord(selectedId,localDate()); if (record) { const now = new Date().toISOString(); record.out = now; record.lunchPunch ||= isLunchTime(now); save(); render(); } };
     $('userTab').onclick = () => switchView('user'); $('managerTab').onclick = () => managerSignedIn ? switchView('manager') : openManagerLogin(); $('reportDate').value = localDate(); $('reportDate').onchange = renderManager;
     $('holidayCalendar').onclick = openHolidayCalendar; $('cancelHoliday').onclick = () => $('holidayBackdrop').classList.remove('show');
     $('holidayForm').onsubmit = event => { event.preventDefault(); const date = $('holidayDate').value; const name = $('holidayName').value.trim(); if (holidayForDate(date)) { alert('A festival holiday is already set for this date.'); return; } data.holidays.push({name, date}); save(); $('holidayName').value = ''; renderHolidayList(); render(); };
